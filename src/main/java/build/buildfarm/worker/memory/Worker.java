@@ -34,6 +34,7 @@ import build.buildfarm.common.InputStreamFactory;
 import build.buildfarm.common.LoggingMain;
 import build.buildfarm.common.config.ConfigAdjuster;
 import build.buildfarm.common.config.MemoryWorkerOptions;
+import build.buildfarm.common.grpc.GrpcChannelBuilder;
 import build.buildfarm.common.grpc.Retrier;
 import build.buildfarm.common.grpc.Retrier.Backoff;
 import build.buildfarm.instance.Instance;
@@ -56,8 +57,6 @@ import com.google.protobuf.TextFormat;
 import com.google.protobuf.util.Durations;
 import io.grpc.Channel;
 import io.grpc.ManagedChannel;
-import io.grpc.netty.NegotiationType;
-import io.grpc.netty.NettyChannelBuilder;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -88,12 +87,6 @@ public class Worker extends LoggingMain {
   private static final ListeningScheduledExecutorService retryScheduler =
       listeningDecorator(newSingleThreadScheduledExecutor());
   private static final Retrier retrier = createStubRetrier();
-
-  private static ManagedChannel createChannel(String target) {
-    NettyChannelBuilder builder =
-        NettyChannelBuilder.forTarget(target).negotiationType(NegotiationType.PLAINTEXT);
-    return builder.build();
-  }
 
   private static Path getValidRoot(WorkerConfig config, FileSystem fileSystem)
       throws ConfigurationException {
@@ -142,7 +135,7 @@ public class Worker extends LoggingMain {
       InstanceEndpoint instanceEndpoint, DigestUtil digestUtil) {
     return newStubInstance(
         instanceEndpoint.getInstanceName(),
-        createChannel(instanceEndpoint.getTarget()),
+        GrpcChannelBuilder.createChannel(instanceEndpoint.getGrpcConfig()),
         digestUtil,
         instanceEndpoint.getDeadlineAfterSeconds());
   }
@@ -175,7 +168,7 @@ public class Worker extends LoggingMain {
     /* initialization */
     DigestUtil digestUtil = new DigestUtil(hashFunction);
     InstanceEndpoint casEndpoint = config.getContentAddressableStorage();
-    ManagedChannel casChannel = createChannel(casEndpoint.getTarget());
+    ManagedChannel casChannel = GrpcChannelBuilder.createChannel(casEndpoint.getGrpcConfig());
     casInstance =
         newStubInstance(
             casEndpoint.getInstanceName(),

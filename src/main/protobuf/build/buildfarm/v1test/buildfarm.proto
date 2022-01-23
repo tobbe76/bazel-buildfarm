@@ -300,12 +300,20 @@ message MemoryCASConfig {
   int64 max_size_bytes = 1;
 }
 
+message GrpcConfig {
+  string target = 1;
+
+  string tls_client_certificate = 2;
+  string tls_client_key = 3;
+  string tls_certificate = 4;
+}
+
 message GrpcCASConfig {
   // CAS resources must contain instance names
   string instance_name = 1;
 
   // grpc endpoint supporting CAS/BS
-  string target = 2;
+  GrpcConfig grpc_config = 2;
 }
 
 message FilesystemCASConfig {
@@ -361,7 +369,7 @@ message GrpcACConfig {
   string instance_name = 1;
 
   // grpc endpoint supporting AC
-  string target = 2;
+  GrpcConfig grpc_config = 2;
 }
 
 message ActionCacheConfig {
@@ -963,7 +971,7 @@ enum CASInsertionPolicy {
 
 message InstanceEndpoint {
   // target suitable for grpc channel creation: host:port is common
-  string target = 1;
+  GrpcConfig grpc_config = 1;
 
   // instance to be used
   string instance_name = 2;

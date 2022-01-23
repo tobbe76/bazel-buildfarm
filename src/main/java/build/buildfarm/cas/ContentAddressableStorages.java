@@ -26,6 +26,7 @@ import build.bazel.remote.execution.v2.RequestMetadata;
 import build.buildfarm.cas.cfc.CASFileCache;
 import build.buildfarm.common.DigestUtil;
 import build.buildfarm.common.Write;
+import build.buildfarm.common.grpc.GrpcChannelBuilder;
 import build.buildfarm.instance.stub.ByteStreamUploader;
 import build.buildfarm.v1test.ContentAddressableStorageConfig;
 import build.buildfarm.v1test.FilesystemCASConfig;
@@ -37,8 +38,6 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.protobuf.ByteString;
 import io.grpc.Channel;
 import io.grpc.Status;
-import io.grpc.netty.NegotiationType;
-import io.grpc.netty.NettyChannelBuilder;
 import io.grpc.stub.ServerCallStreamObserver;
 import java.io.IOException;
 import java.io.InputStream;
@@ -49,14 +48,9 @@ import java.util.UUID;
 import javax.naming.ConfigurationException;
 
 public final class ContentAddressableStorages {
-  private static Channel createChannel(String target) {
-    NettyChannelBuilder builder =
-        NettyChannelBuilder.forTarget(target).negotiationType(NegotiationType.PLAINTEXT);
-    return builder.build();
-  }
 
   public static ContentAddressableStorage createGrpcCAS(GrpcCASConfig config) {
-    Channel channel = createChannel(config.getTarget());
+    Channel channel = GrpcChannelBuilder.createChannel(config.getGrpcConfig());
     ByteStreamUploader byteStreamUploader =
         new ByteStreamUploader("", channel, null, 300, NO_RETRIES);
     ListMultimap<Digest, Runnable> onExpirations =

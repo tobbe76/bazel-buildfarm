@@ -51,6 +51,7 @@ import build.buildfarm.common.TreeIterator.DirectoryEntry;
 import build.buildfarm.common.Watchdog;
 import build.buildfarm.common.Watcher;
 import build.buildfarm.common.Write;
+import build.buildfarm.common.grpc.GrpcChannelBuilder;
 import build.buildfarm.common.io.FeedbackOutputStream;
 import build.buildfarm.instance.MatchListener;
 import build.buildfarm.instance.queues.Worker;
@@ -106,8 +107,6 @@ import io.grpc.Channel;
 import io.grpc.Status;
 import io.grpc.Status.Code;
 import io.grpc.StatusException;
-import io.grpc.netty.NegotiationType;
-import io.grpc.netty.NettyChannelBuilder;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Paths;
@@ -267,14 +266,8 @@ public class MemoryInstance extends AbstractServerInstance {
     }
   }
 
-  private static Channel createChannel(String target) {
-    NettyChannelBuilder builder =
-        NettyChannelBuilder.forTarget(target).negotiationType(NegotiationType.PLAINTEXT);
-    return builder.build();
-  }
-
   private static ActionCache createGrpcActionCache(GrpcACConfig config) {
-    Channel channel = createChannel(config.getTarget());
+    Channel channel = GrpcChannelBuilder.createChannel(config.getGrpcConfig());
     return new GrpcActionCache(config.getInstanceName(), channel);
   }
 

@@ -11,6 +11,7 @@ java_library(
         "//src/main/java/build/buildfarm/instance/server",
         "//src/main/java/build/buildfarm/operations",
         "//src/main/java/build/buildfarm/worker",
+        "//src/main/java/build/buildfarm/common/grpc",
         "//src/main/protobuf:build_buildfarm_v1test_buildfarm_java_proto",
         "@googleapis//:google_longrunning_operations_java_proto",
         "@googleapis//:google_rpc_code_java_proto",
